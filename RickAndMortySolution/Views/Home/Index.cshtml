@@ -1,0 +1,116 @@
+﻿@model RickAndMortySolution.Models.CharactersRequest;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        function AlertName(name) {
+            console.log(name)
+            $('#exampleModal').modal('show');
+            document.getElementById("modal-body").innerHTML = "<h3>Loading...</h3>";
+            $.ajax({
+                type: "GET",
+                url: 'Home/Get/'+name,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: successFunc,
+                error: errorFunc
+            });
+
+            function successFunc(data, status) {
+                console.log(data)
+                document.getElementById("exampleModalLabel").innerHTML = data.name
+                document.getElementById("modal-body").innerHTML = getHtmlInfoTemplate(data)
+            }
+
+            function errorFunc() {
+                document.getElementById("modal-body").innerHTML = "Error";
+            }
+        }
+
+        function getHtmlInfoTemplate(data){
+            return `
+                <div class="card mb-3">
+                    <img class="card-img-top" src="${data.image}" style='width:100;height:100' alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">${data.name}</h5>
+                        <p class="card-text">Status: ${data.status}</p>
+                        <p class="card-text">Status: ${data.species}</p>
+                        <p class="card-text">Status: ${data.type}</p>
+                        <p class="card-text">Status: ${data.origin.name}</p>
+                        <p class="card-text">Status: ${data.status}</p>
+                        <a href='${data.url}'> Profile </a>
+                        <p class="card-text"><small class="text-muted">Creado: ${data.created}</small></p>
+                    </div>
+                </div>
+            `
+        }
+    </script>
+
+}
+
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold">Rick And Morty Characters</h1>
+    <h2 class="display-4 text-muted">You are seeing page: @ViewBag.page of @Model.info.pages</h2>
+    <hr />
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                   
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @foreach (var character in Model.results)
+    {
+        <div class="card mb-3 text-dark bg-light" style="max-width: auto; border-radius:30px">
+            <div class="row no-gutters">
+                <div class="col-md-4" >
+                    <img src="@character.Image" style="margin:1rem" alt="...">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h4 class="card-title font-weight-bold">Information</h4>
+                        <hr />
+                        <p class="font-weight-light">Gender: @character.Gender</p>
+                        <p class="font-weight-light">Specie: @character.Species</p>
+                        <p class="font-weight-light">Type: @character.Type</p>
+                        <p class="font-weight-light">Status: @character.Status</p>
+                        <p class="font-weight-light">Origin: @character.Origin.Name</p>
+                        <p class="font-weight-light"><small class="text-muted">Created At @character.Created</small></p>
+                        <p>
+                            <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                Episodes
+                            </a>
+                        </p>
+                        <div class="collapse" id="collapseExample">
+                            @foreach (var episode in character.Episode)
+                            {
+                                <p> <a href="@episode" class="font-weight-light">@episode</a> </p>
+                            }
+                        </div>
+                        <button class="btn btn-success" onclick="AlertName('@character.Id')">Ver Perfil</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <p>
+        @Html.ActionLink($"Next Page {ViewBag.page}", "Index", new { page = @ViewBag.page++ })
+    </p>
+</div>
+
+
